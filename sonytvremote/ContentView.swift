@@ -1,61 +1,73 @@
-//
-//  ContentView.swift
-//  sonytvremote
-//
-//  Created by Uday Garg on 08/03/26.
-//
-
 import SwiftUI
-import SwiftData
+import OSLog
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @StateObject private var vm = RemoteViewModel()
+    @State private var selectedTab = 0
+    
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "com.app", category: "ContentView")
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        TabView(selection: $selectedTab) {
+            // Remote Control
+            NavigationStack {
+                RemoteView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            NavigationLink(destination: SettingsView().environmentObject(vm)) {
+                                Image(systemName: "gear")
+                                    .foregroundColor(.gray)
+                            }
+                        }
                     }
-                }
-                .onDelete(perform: deleteItems)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            .tabItem {
+                Label("Remote", systemImage: "tv.remote.fill")
             }
-        } detail: {
-            Text("Select an item")
-        }
-    }
+            .tag(0)
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            // Apps
+            NavigationStack {
+                AppsView()
             }
+            .tabItem {
+                Label("Apps", systemImage: "square.grid.2x2.fill")
+            }
+            .tag(1)
+
+            // Inputs
+            NavigationStack {
+                InputsView()
+            }
+            .tabItem {
+                Label("Inputs", systemImage: "cable.connector.horizontal")
+            }
+            .tag(2)
+
+            // Settings
+            NavigationStack {
+                SettingsView()
+            }
+            .tabItem {
+                Label("Settings", systemImage: "gear")
+            }
+            .tag(3)
+        }
+        .accentColor(.cyan)
+        .preferredColorScheme(.dark)
+        .environmentObject(vm)
+        .task {
+            logger.info("ContentView appeared - initializing app")
+            await vm.loadSettings()
+            vm.startPolling()
+        }
+        .onChange(of: selectedTab) { oldValue, newValue in
+            logger.debug("Tab changed from \(oldValue) to \(newValue)")
         }
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
