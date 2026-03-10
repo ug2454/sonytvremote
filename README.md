@@ -8,11 +8,11 @@ Place the screenshots in `docs/screenshots/` with the filenames below.
 
 | Remote | Apps | Inputs |
 | --- | --- | --- |
-| ![Remote](docs/screenshots/remote.jpg) | ![Apps](docs/screenshots/apps.png) | ![Inputs](docs/screenshots/inputs.png) |
+| ![Remote](docs/screenshots/remote.png) | ![Apps](docs/screenshots/apps.png) | ![Inputs](docs/screenshots/inputs.png) |
 
 | Settings | Remote (Playback) |
 | --- | --- |
-| ![Settings](docs/screenshots/settings.png) | ![Remote Playback](docs/screenshots/remote-playback.png) |
+| ![Settings](docs/screenshots/settings.jpg) | ![Remote Playback](docs/screenshots/remote-playback.png) |
 
 ## Features
 
@@ -82,4 +82,4 @@ All communication happens on your local network. No data is sent to external ser
 
 ## License
 
-TBD
+Apache License 2.0. See `LICENSE`.
